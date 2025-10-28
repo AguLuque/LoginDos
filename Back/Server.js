@@ -1,18 +1,14 @@
-// Archivo principal que levanta el servidor
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 
-// Importar la configuración de la base de datos
 import { connectDB } from "./src/config/db.js"; // conexión MySQL
-// import { conectarMongo } from "./src/config/dbMongo.js"; // ❌ COMENTADO
+import { conectarMongo } from "./src/config/dbMongo.js"; // ❌ COMENTADO
 
-// Importar rutas
 import jugadoresRoutes from "./src/routes/jugadores.js";
 import authRoutes from "./src/routes/AuthR.js";
 import dashboardRoutes from "./src/routes/dashboardR.js";
 
-// Cargamos variables de entorno
 dotenv.config();
 
 const app = express();
@@ -30,21 +26,18 @@ app.use(
   })
 );
 
-// prueba
 app.get("/", (req, res) => {
   res.send("¡El servidor está funcionando!");
 });
 
-// Rutas
 app.use("/api", authRoutes);
 app.use("/api/jugadores", jugadoresRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-// Función principal
 const startServer = async () => {
   try {
     await connectDB(); // MySQL
-    // await conectarMongo(); // ❌ COMENTADO - MongoDB
+    await conectarMongo(); // MongoDB
 
     app.listen(PORT, HOST, () => {
       console.log(`🚀 Servidor escuchando en http://${HOST}:${PORT}`);
@@ -57,5 +50,4 @@ const startServer = async () => {
   }
 };
 
-// Iniciar
 startServer();

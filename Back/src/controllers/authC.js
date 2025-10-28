@@ -2,12 +2,10 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { getUserByEmail, createUser } from '../service/authS.js';
 
-// Controlador para LOGIN (solo verifica credenciales)
 export const loginController = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validación básica
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -15,16 +13,16 @@ export const loginController = async (req, res) => {
             });
         }
 
-        // Validar formato de email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return res.status(400).json({
                 success: false,
                 message: "Formato de email inválido"
             });
+
+
         }
 
-        // Buscar usuario en la base de datos
         const usuario = await getUserByEmail(email);
 
         if (!usuario) {
@@ -34,7 +32,6 @@ export const loginController = async (req, res) => {
             });
         }
 
-        // Verificar contraseña
         const passwordValida = await bcrypt.compare(password, usuario.password);
         
         if (!passwordValida) {
@@ -44,7 +41,6 @@ export const loginController = async (req, res) => {
             });
         }
 
-        // Generar token
         const token = jwt.sign(
             { 
                 id: usuario.id, 
@@ -75,12 +71,10 @@ export const loginController = async (req, res) => {
     }
 };
 
-// Controlador para REGISTRO (crea nuevos usuarios)
 export const registerController = async (req, res) => {
     try {
         const { email, password, nombre } = req.body;
 
-        // Validaciones
         if (!email || !password || !nombre) {
             return res.status(400).json({
                 success: false,
@@ -88,7 +82,6 @@ export const registerController = async (req, res) => {
             });
         }
 
-    // Verificar si el usuario ya existe
         const usuarioExistente = await getUserByEmail(email);
         
         if (usuarioExistente) {
@@ -98,7 +91,6 @@ export const registerController = async (req, res) => {
             });
         }
 
-        // Crear nuevo usuario
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -108,7 +100,6 @@ export const registerController = async (req, res) => {
             nombre
         });
 
-        // Generar token
         const token = jwt.sign(
             { 
                 id: nuevoUsuario.id, 
@@ -147,7 +138,6 @@ export const registerController = async (req, res) => {
     }
 };
 
-// Controlador para verificar token
 export const verifyTokenController = async (req, res) => {
     try {
         const token = req.headers.authorization?.replace('Bearer ', '');

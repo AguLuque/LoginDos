@@ -3,13 +3,10 @@ import { loginController, registerController, verifyTokenController } from '../c
 
 const router = express.Router();
 
-// Ruta para login (solo verifica credenciales)
 router.post('/login', loginController);
 
-// Ruta para registro (crea nuevos usuarios)
 router.post('/register', registerController);
 
-// Ruta para verificar token
 router.get('/verify-token', verifyTokenController);
 
 export default router;

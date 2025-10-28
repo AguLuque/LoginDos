@@ -1,6 +1,5 @@
 import pool from "../config/db.js";
 
-// Totalizadores
 export const getDashboardStats = async () => {
   const [rows] = await pool.query(`
     SELECT 
@@ -11,7 +10,6 @@ export const getDashboardStats = async () => {
   return rows[0];
 };
 
-// Últimos jugadores
 export const getUltimosJugadores = async (limit = 30) => {
   const [rows] = await pool.query(`
     SELECT 
@@ -29,7 +27,6 @@ export const getUltimosJugadores = async (limit = 30) => {
   return rows;
 };
 
-// Partidos recientes
 export const getPartidos = async (limit = 30) => {
   try {
     const [rows] = await pool.query(`
@@ -69,7 +66,6 @@ export const getPartidos = async (limit = 30) => {
   }
 };
 
-// Torneos
 export const getTorneos = async (limit = 30) => {
   try {
     const [rows] = await pool.query(`
@@ -91,7 +87,6 @@ export const getTorneos = async (limit = 30) => {
   }
 };
 
-// FUNCIONES LEGACY (para mantener compatibilidad con controladores viejos)
 export const getStats = getDashboardStats;
 export const getPartidosRecientes = getPartidos;
 

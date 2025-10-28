@@ -6,7 +6,6 @@ import {
     getJugadorPorNombre
 } from '../service/dashboardS.js';
 
-// Controlador para obtener estadísticas
 export const statsController = async (req, res) => {
     try {
         const stats = await getStats();
@@ -25,7 +24,6 @@ export const statsController = async (req, res) => {
     }
 };
 
-// Controlador para obtener jugadores
 export const jugadoresController = async (req, res) => {
     try {
         const limit = req.query.limit || 30;
@@ -45,7 +43,6 @@ export const jugadoresController = async (req, res) => {
     }
 };
 
-// Controlador para obtener partidos recientes
 export const partidosController = async (req, res) => {
     try {
         const limit = req.query.limit || 30;
@@ -65,7 +62,6 @@ export const partidosController = async (req, res) => {
     }
 };
 
-// Controlador para consultar partidos ganados por un jugador
 export const partidosGanadosController = async (req, res) => {
     try {
         const { nombre } = req.params;
@@ -93,7 +89,6 @@ export const partidosGanadosController = async (req, res) => {
     }
 };
 
-// Controlador para buscar jugador por nombre
 export const buscarJugadorController = async (req, res) => {
     try {
         const { nombre } = req.params;

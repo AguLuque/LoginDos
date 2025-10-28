@@ -1,6 +1,5 @@
 import pool from '../config/db.js'; // Ajusta la ruta según tu configuración
 
-// Obtener usuario por email
 export const getUserByEmail = async (email) => {
     try {
         const [rows] = await pool.execute(

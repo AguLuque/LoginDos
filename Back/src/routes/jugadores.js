@@ -10,9 +10,9 @@ import {
 const router = express.Router();
 
 // Rutas MySQL
-router.get('/test', testController);                    // GET /api/jugadores/test
-router.get('/todos', fetchTodosLosJugadores);          // GET /api/jugadores/todos  
-router.get('/buscar/:nombre', fetchJugadoresPorNombre); // GET /api/jugadores/buscar/:nombre
+router.get('/test', testController);               
+router.get('/todos', fetchTodosLosJugadores);         
+router.get('/buscar/:nombre', fetchJugadoresPorNombre); 
 
 // Rutas Mongo
 

@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import apiurl from '../config/Const';
 
 
- 
+
 
 const LoginForm = ({ onSwitchToRegister, onLogin }) => {
   const { login } = useAuth();
@@ -33,14 +33,11 @@ const LoginForm = ({ onSwitchToRegister, onLogin }) => {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Guardar datos en localStorage
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Esperar un momento para asegurar que se guardó
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Ahora sí navegar
       login(data.user, data.token);
 
     } catch (err) {
@@ -54,10 +51,14 @@ const LoginForm = ({ onSwitchToRegister, onLogin }) => {
     <div className="relative mx-auto w-full max-w-md bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:rounded-xl sm:px-10">
       <div className="w-full">
         <div className="text-center">
+          <img
+            src="/Logo.png"
+            alt="Logo"
+            className="w-24 h-24 mx-auto mb-4 object-contain"
+          />
           <h1 className="text-3xl font-semibold text-gray-900">Iniciar Sesión</h1>
           <p className="mt-2 text-gray-500">Ingresa tus credenciales para continuar</p>
         </div>
-
         <div className="mt-5">
           <form onSubmit={handleSubmit}>
             {error && (
@@ -337,11 +338,9 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = (userData) => {
-    // Redirigir inmediatamente al dashboard
     navigate('/dashboard', { replace: true });
   };
 
-  // Verificar si ya hay un usuario logueado al cargar
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {

@@ -8,7 +8,6 @@ import {
 
 const router = Router();
 
-// 📊 Estadísticas generales
 router.get("/stats", async (req, res) => {
   try {
     const data = await getDashboardStats();
@@ -19,7 +18,6 @@ router.get("/stats", async (req, res) => {
   }
 });
 
-// 🧍 Últimos jugadores
 router.get("/jugadores", async (req, res) => {
   try {
     const data = await getUltimosJugadores();
@@ -30,7 +28,6 @@ router.get("/jugadores", async (req, res) => {
   }
 });
 
-// ⚽ Últimos partidos
 router.get("/partidos", async (req, res) => {
   try {
     const data = await getPartidos();
@@ -41,7 +38,6 @@ router.get("/partidos", async (req, res) => {
   }
 });
 
-// 🏆 Torneos jugados
 router.get("/torneos", async (req, res) => {
   try {
     const data = await getTorneos();

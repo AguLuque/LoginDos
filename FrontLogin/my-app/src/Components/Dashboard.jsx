@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import apiurl from "../config/Const";
 
-// ---------------------- UTILIDADES ----------------------
+// UTILIDADES 
 
 const getJugadorImage = (idJugador) => {
   try {
@@ -23,109 +23,240 @@ const formatearFecha = (fecha) => {
   });
 };
 
-const calcularEdad = (fechaNacimiento) => {
-  if (!fechaNacimiento) return 'N/A';
+const calcularedad = (fechaNacimiento) => {
+  if (!fechaNacimiento) return "N/A";
   const nacimiento = new Date(fechaNacimiento);
   const hoy = new Date();
   let edad = hoy.getFullYear() - nacimiento.getFullYear();
   const mes = hoy.getMonth() - nacimiento.getMonth();
-
-  if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-    edad--;
-  }
-
+  if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
   return edad;
 };
 
-// ---------------------- COMPONENTES ----------------------
+// MODAL DETALLE JUGADOR 
 
-const JugadorCard = ({ jugador }) => {
+const ModalDetalleJugador = ({ jugador, onClose, partidos, torneos }) => {
   const [imgError, setImgError] = useState(false);
 
+  if (!jugador) return null;
+
+  const partidosJugador = partidos.filter(
+    (p) =>
+      p.ParejaUno?.toLowerCase().includes(jugador.Nombre.toLowerCase()) ||
+      p.ParejaUno?.toLowerCase().includes(jugador.Apellido.toLowerCase()) ||
+      p.ParejaDos?.toLowerCase().includes(jugador.Nombre.toLowerCase()) ||
+      p.ParejaDos?.toLowerCase().includes(jugador.Apellido.toLowerCase())
+  );
+
+  const torneosJugador = torneos.filter((t) =>
+    partidosJugador.some((p) => p.Torneo === t.Nombre)
+  );
+
   return (
-    <div className="max-w-xs bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
-      {/* Imagen del jugador */}
-      <div className="relative w-full h-56 flex justify-center items-center bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden rounded-t-xl">
-        {!imgError ? (
-          <img
-            src={getJugadorImage(jugador.IdJugador)}
-            alt={`${jugador.Nombre} ${jugador.Apellido}`}
-            className="h-full w-auto object-contain transition-transform duration-300 hover:scale-105"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="flex items-center justify-center text-gray-400 text-5xl font-bold">
-            {jugador.Nombre?.charAt(0)}
-            {jugador.Apellido?.charAt(0)}
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-500 text-white p-6 rounded-t-2xl flex justify-between items-start shadow-lg">
+          <div className="flex items-center gap-6">
+            <div className="w-24 h-24 bg-white rounded-full overflow-hidden flex items-center justify-center">
+              {!imgError ? (
+                <img
+                  src={getJugadorImage(jugador.IdJugador)}
+                  alt={`${jugador.Nombre} ${jugador.Apellido}`}
+                  className="w-full h-full object-cover"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <div className="text-black-600 text-4xl font-bold">
+                  {jugador.Nombre?.charAt(0)}
+                  {jugador.Apellido?.charAt(0)}
+                </div>
+              )}
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-1">
+                {jugador.Nombre} {jugador.Apellido}
+              </h2>
+              <div className="flex gap-3">
+                <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                  #{jugador.Ranking}
+                </span>
+                <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                  {calcularedad(jugador.FechaNacimiento)} años
+                </span>
+              </div>
+            </div>
           </div>
-        )}
-
-        {/* Etiqueta de ranking */}
-        <div className="absolute top-3 right-3 bg-gray-800 text-white px-3 py-1 rounded-full font-semibold text-xs shadow-sm">
-          #{jugador.Ranking}
-        </div>
-      </div>
-
-      {/* Información del jugador */}
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">
-          {jugador.Nombre} {jugador.Apellido}
-        </h3>
-
-        <div className="space-y-1 text-sm text-gray-600">
-          <p><span className="font-medium text-gray-700">Gmail:</span> {jugador.Gmail || "Sin correo"}</p>
-          <p><span className="font-medium text-gray-700">Tel:</span> {jugador.Telefono || "Sin teléfono"}</p>
-          <p><span className="font-medium text-gray-700">Edad:</span> {calcularEdad(jugador.FechaNacimiento)} años</p>
+          <button onClick={onClose} className="btn btn-circle btn-ghost text-white">
+            ✕
+          </button>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-gray-200 text-right">
-          <span className="text-sm text-gray-500">Ranking:</span>{" "}
-          <span className="text-lg font-semibold text-gray-800">{jugador.Ranking}</span>
+        {/* Contenido */}
+        <div className="p-6">
+          {/* Info Personal */}
+          <div className="bg-gray-50 rounded-xl p-6 mb-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg className="w-6 h-6 text-black-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              Información Personal
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p><b>Email:</b> {jugador.Gmail || "Sin correo"}</p>
+              <p><b>Teléfono:</b> {jugador.Telefono || "Sin teléfono"}</p>
+              <p><b>Fecha Nac.:</b> {formatearFecha(jugador.FechaNacimiento)}</p>
+              <p><b>Ranking:</b> #{jugador.Ranking}</p>
+            </div>
+          </div>
+
+          {/* Partidos */}
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Partidos ({partidosJugador.length})
+            </h3>
+            {partidosJugador.length > 0 ? (
+              <div className="grid md:grid-cols-2 gap-4">
+                {partidosJugador.map((p) => (
+                  <div key={p.IdPartido} className="bg-white border rounded-lg p-4">
+                    <div className="flex justify-between">
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded ${p.Estado === "completado"
+                          ? "bg-blue-100 text-blue-700"
+                          : p.Estado === "en juego"
+                            ? "bg-blue-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                          }`}
+                      >
+                        {p.Estado || 'Pendiente'}
+                      </span>
+                    </div>
+                    <p className="font-bold mt-1">{p.ParejaUno}  {p.ParejaDos}</p>
+                    <p className="text-sm mt-1"> {p.Cancha || "Por definir"}</p>
+                    <p className="text-sm"> {p.Torneo || "Sin torneo"}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">No hay partidos registrados.</p>
+            )}
+          </div>
+
+          {/* Torneos */}
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Torneos ({torneosJugador.length})
+            </h3>
+            {torneosJugador.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {torneosJugador.map((t) => (
+                  <div
+                    key={t.IdTorneo}
+                    className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4 shadow-sm"
+                  >
+                    <h4 className="font-bold text-black-700 mb-1">{t.Nombre}</h4>
+                    <p> Estado: {t.Estado}</p>
+                    <p> Máx Parejas: {t.MaxParejas}</p>
+                    {t.Reglamento && (
+                      <p className="text-xs text-gray-500 truncate">📋 {t.Reglamento}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">No hay torneos registrados.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-gray-100 p-4 rounded-b-2xl flex justify-end">
+          <button onClick={onClose} className="btn btn-primary">
+            Cerrar
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// Card de partido
+
+// COMPONENTES DE TARJETAS
+
+const JugadorCard = ({ jugador, onClick }) => {
+  const [imgError, setImgError] = useState(false);
+  return (
+    <div
+      onClick={() => onClick(jugador)}
+      className="max-w-xs bg-white rounded-xl shadow-md hover:shadow-xl transition-all overflow-hidden cursor-pointer"
+    >
+      <div className="relative w-full h-56 flex justify-center items-center bg-gradient-to-b from-gray-50 to-gray-100 overflow-hidden rounded-t-xl">
+        {!imgError ? (
+          <img
+            src={getJugadorImage(jugador.IdJugador)}
+            alt={`${jugador.Nombre} ${jugador.Apellido}`}
+            className="h-full w-auto object-contain"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="flex items-center justify-center text-gray-400 text-5xl font-bold">
+            {jugador.Nombre?.charAt(0)}{jugador.Apellido?.charAt(0)}
+          </div>
+        )}
+        <div className="absolute top-3 right-3 bg-gray-800 text-white px-3 py-1 rounded-full font-semibold text-xs shadow-sm">
+          #{jugador.Ranking}
+        </div>
+      </div>
+      <div className="p-5">
+        <h3 className="text-xl font-bold text-gray-900 mb-2">{jugador.Nombre} {jugador.Apellido}</h3>
+        <p className="text-sm text-gray-600"><b>Edad:</b> {calcularedad(jugador.FechaNacimiento)} años</p>
+        <p className="h4-xs text-blue-600 font-medium mt-2">Click para ver más detalles</p>
+      </div>
+    </div>
+  );
+};
+
 const PartidoCard = ({ partido }) => (
   <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
     <div className="flex justify-between mb-3">
       <span className="text-sm text-gray-500">{formatearFecha(partido.Fecha)}</span>
       <span
         className={`text-xs font-bold px-2 py-1 rounded ${partido.Estado === "completado"
-          ? "bg-green-100 text-green-700"
-          : "bg-yellow-100 text-yellow-700"
+          ? "bg-blue-100 text-blue-700"
+          : "bg-blue-100 text-green-700"
           }`}
       >
         {partido.Estado || 'Pendiente'}
       </span>
     </div>
     <div className="text-lg font-semibold text-gray-800">
-      {partido.ParejaUno} 🆚 {partido.ParejaDos}
+      {partido.ParejaUno} VS {partido.ParejaDos}
     </div>
     <div className="mt-3 text-sm text-gray-600">
-      <p>📍 {partido.Cancha || 'Por definir'}</p>
-      <p>🏆 {partido.Torneo || 'Sin torneo'}</p>
-      <p>⏰ {partido.HoraInicio || '--:--'} - {partido.HoraFin || '--:--'}</p>
-      <p>🎯 Fase: {partido.Fase || 'N/A'} | Zona {partido.Zona || 'N/A'}</p>
+      <p> {partido.Cancha || 'Por definir'}</p>
+      <p> {partido.Torneo || 'Sin torneo'}</p>
+      <p> {partido.HoraInicio || '--:--'} - {partido.HoraFin || '--:--'}</p>
+      <p> Fase: {partido.Fase || 'N/A'} | Zona {partido.Zona || 'N/A'}</p>
     </div>
   </div>
 );
 
-// Card de torneo
 const TorneoCard = ({ torneo }) => (
   <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
-    <h3 className="text-xl font-bold text-purple-700 mb-2">{torneo.Nombre}</h3>
-    <p className="text-gray-600">📊 Estado: {torneo.Estado}</p>
-    <p className="text-gray-600 mt-2">👥 Máx Parejas: {torneo.MaxParejas}</p>
+    <h3 className="text-xl font-bold text-black-700 mb-2">{torneo.Nombre}</h3>
+    <p className="text-gray-600"> Estado: {torneo.Estado}</p>
+    <p className="text-gray-600 mt-2"> Máx Parejas: {torneo.MaxParejas}</p>
     {torneo.Reglamento && (
       <p className="text-xs text-gray-400 mt-2 truncate">📋 {torneo.Reglamento}</p>
     )}
   </div>
 );
-
-// ---------------------- DASHBOARD PRINCIPAL ----------------------
+// DASHBOARD PRINCIPAL
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -133,13 +264,14 @@ export default function Dashboard() {
   const [partidos, setPartidos] = useState([]);
   const [torneos, setTorneos] = useState([]);
   const [activeTab, setActiveTab] = useState("jugadores");
+  const [jugadorSeleccionado, setJugadorSeleccionado] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchLoading, setSearchLoading] = useState(false);
   const [jugadoresFiltrados, setJugadoresFiltrados] = useState([]);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
+  // redirección si no hay sesión iniciada
   useEffect(() => {
     if (!user) {
       navigate("/");
@@ -148,37 +280,34 @@ export default function Dashboard() {
     fetchData();
   }, [user, navigate]);
 
-  // Efecto para búsqueda en tiempo real
+  // Filtrado en tiempo real
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+    const delay = setTimeout(() => {
       if (searchTerm.trim() !== "") {
-        buscarJugadores(searchTerm);
+        const filtrados = jugadores.filter((j) =>
+          `${j.Nombre} ${j.Apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setJugadoresFiltrados(filtrados);
       } else {
         setJugadoresFiltrados(jugadores);
       }
-    }, 500); // Espera 500ms después de que el usuario deje de escribir
-
-    return () => clearTimeout(delayDebounce);
+    }, 400);
+    return () => clearTimeout(delay);
   }, [searchTerm, jugadores]);
 
   const fetchData = async () => {
     try {
-      const [statsRes, jugadoresRes, partidosRes, torneosRes] = await Promise.all([
+      const [s, j, p, t] = await Promise.all([
         fetch(`${apiurl}/api/dashboard/stats`),
         fetch(`${apiurl}/api/dashboard/jugadores`),
         fetch(`${apiurl}/api/dashboard/partidos`),
         fetch(`${apiurl}/api/dashboard/torneos`),
       ]);
 
-      const statsData = await statsRes.json();
-      const jugadoresData = await jugadoresRes.json();
-      const partidosData = await partidosRes.json();
-      const torneosData = await torneosRes.json();
-
-      console.log('Stats:', statsData);
-      console.log('Jugadores:', jugadoresData);
-      console.log('Partidos:', partidosData);
-      console.log('Torneos:', torneosData);
+      const statsData = await s.json();
+      const jugadoresData = await j.json();
+      const partidosData = await p.json();
+      const torneosData = await t.json();
 
       if (statsData.success) setStats(statsData.data);
       if (jugadoresData.success) {
@@ -187,66 +316,71 @@ export default function Dashboard() {
       }
       if (partidosData.success) setPartidos(partidosData.data || []);
       if (torneosData.success) setTorneos(torneosData.data || []);
-    } catch (error) {
-      console.error("Error cargando datos:", error);
+    } catch (err) {
+      console.error("Error cargando datos:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const buscarJugadores = async (nombre) => {
-    if (!nombre.trim()) {
-      setJugadoresFiltrados(jugadores);
-      return;
-    }
-
-    setSearchLoading(true);
-    try {
-      const response = await fetch(`${apiurl}/api/jugadores/buscar/${nombre}`);
-      const data = await response.json();
-
-      if (data.success) {
-        setJugadoresFiltrados(data.data || []);
-      } else {
-        setJugadoresFiltrados([]);
-      }
-    } catch (error) {
-      console.error("Error buscando jugadores:", error);
-      setJugadoresFiltrados([]);
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  const limpiarBusqueda = () => {
-    setSearchTerm("");
-    setJugadoresFiltrados(jugadores);
-  };
-
   if (loading)
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-          <div className="text-xl text-gray-600">Cargando...</div>
-        </div>
+      <div className="flex h-screen items-center justify-center bg-gray-100">
+        <span className="loading loading-spinner loading-lg text-black-600"></span>
       </div>
     );
 
-  // ---------------------- RENDER PRINCIPAL ----------------------
+  //RENDER PRINCIPAL
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Modal Detalle Jugador */}
+      {jugadorSeleccionado && (
+        <ModalDetalleJugador
+          jugador={jugadorSeleccionado}
+          onClose={() => setJugadorSeleccionado(null)}
+          partidos={partidos}
+          torneos={torneos}
+        />
+      )}
       {/* HEADER */}
-      <div className="bg-white shadow">
+      <div className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">🏆 Dashboard Torneos 2025</h1>
+          {/* Logo + Título */}
+          <div className="flex items-center gap-3">
+            <img
+              src="/Logo.png"
+              alt="Logo A3SET"
+              className="w-14 h-14 object-contain"
+            />
+            <h1 className="text-2xl font-bold text-gray-900">
+              Torneos Nueva Temporada
+            </h1>
+          </div>
+
+          {/* Usuario + Botón */}
           <div className="flex items-center gap-4">
-            <span className="text-gray-700">Hola, {user?.nombre || "Invitado"}</span>
+            <span className="text-gray-700">
+              Hola, {user?.nombre || "Invitado"}
+            </span>
             <button
               onClick={logout}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors shadow-sm flex items-center gap-2"
             >
-              Cerrar Sesión
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.8}
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H3"
+                />
+              </svg>
+              <span>Cerrar sesión</span>
             </button>
           </div>
         </div>
@@ -254,7 +388,7 @@ export default function Dashboard() {
 
       {/* CONTENIDO */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Estadísticas CLICKEABLES */}
+        {/* Estadísticas clickeables */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <StatCard
             label="Total Jugadores"
@@ -266,109 +400,81 @@ export default function Dashboard() {
           <StatCard
             label="Total Partidos"
             value={stats?.totalPartidos}
-            color="green"
+            color="blue"
             onClick={() => setActiveTab("partidos")}
             active={activeTab === "partidos"}
           />
           <StatCard
             label="Total Torneos"
             value={stats?.totalTorneos}
-            color="purple"
+            color="blue"
             onClick={() => setActiveTab("torneos")}
             active={activeTab === "torneos"}
           />
         </div>
 
-        {/* Secciones dinámicas */}
         {activeTab === "jugadores" && (
           <Section title="Jugadores Registrados">
-            {/* Barra de búsqueda con DaisyUI */}
+
             <div className="mb-6">
-              <div className="form-control">
-                <div className="input-group">
+              <div className="w-full max-w-md mb-6">
+                <label className="input input-bordered flex items-center gap-2 w-full">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5 opacity-50"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+
                   <input
                     type="text"
-                    placeholder="Buscar jugador por nombre..."
-                    className="input input-bordered input-primary w-full"
+                    placeholder="Buscar jugador..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full focus:outline-none"
                   />
-                  {searchTerm && (
-                    <button
-                      className="btn btn-square btn-outline btn-primary"
-                      onClick={limpiarBusqueda}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                  <button className="btn btn-square btn-primary">
-                    {searchLoading ? (
-                      <span className="loading loading-spinner loading-sm"></span>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                </div>
+                </label>
+
                 {searchTerm && (
                   <label className="label">
-                    <span className="label-text-alt">
-                      {jugadoresFiltrados.length} resultado(s) encontrado(s)
+                    <span className="label-text-alt text-gray-600">
+                      {jugadoresFiltrados.length} resultado(s)
                     </span>
                   </label>
                 )}
               </div>
+
             </div>
 
             {jugadoresFiltrados.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {jugadoresFiltrados.map((jugador) => (
-                  <JugadorCard key={jugador.IdJugador} jugador={jugador} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                {jugadoresFiltrados.map((j) => (
+                  <JugadorCard
+                    key={j.IdJugador}
+                    jugador={j}
+                    onClick={setJugadorSeleccionado}
+                  />
                 ))}
               </div>
             ) : (
-              <EmptyState
-                mensaje={
-                  searchTerm
-                    ? `No se encontraron jugadores con "${searchTerm}"`
-                    : "No hay jugadores registrados."
-                }
-              />
+              <EmptyState mensaje="No se encontraron jugadores." />
             )}
           </Section>
         )}
 
         {activeTab === "partidos" && (
-          <Section title="Partidos Recientes">
+          <Section title="Partidos Registrados">
             {partidos.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {partidos.map((partido) => (
-                  <PartidoCard key={partido.IdPartido} partido={partido} />
+                {partidos.map((p) => (
+                  <PartidoCard key={p.IdPartido} partido={p} />
                 ))}
               </div>
             ) : (
@@ -378,11 +484,11 @@ export default function Dashboard() {
         )}
 
         {activeTab === "torneos" && (
-          <Section title="Torneos Activos">
+          <Section title="Torneos Disponibles">
             {torneos.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {torneos.map((torneo) => (
-                  <TorneoCard key={torneo.IdTorneo} torneo={torneo} />
+                {torneos.map((t) => (
+                  <TorneoCard key={t.IdTorneo} torneo={t} />
                 ))}
               </div>
             ) : (
@@ -395,94 +501,47 @@ export default function Dashboard() {
   );
 }
 
-// ---------------------- COMPONENTES AUXILIARES ----------------------
+//COMPONENTES AUXILIARES
 
 const StatCard = ({ label, value, color, onClick, active }) => {
-  const colorClasses = {
-    blue: {
-      border: 'border-blue-500',
-      text: 'text-blue-600',
-      bg: 'bg-blue-50',
-      activeBg: 'bg-blue-100'
-    },
-    green: {
-      border: 'border-green-500',
-      text: 'text-green-600',
-      bg: 'bg-green-50',
-      activeBg: 'bg-green-100'
-    },
-    purple: {
-      border: 'border-purple-500',
-      text: 'text-purple-600',
-      bg: 'bg-purple-50',
-      activeBg: 'bg-purple-100'
-    }
-  };
-
-  const colors = colorClasses[color];
+  const colors = {
+    blue: "from-blue-100 to-blue-50 text-blue-700 border-blue-500",
+  }[color];
 
   return (
     <div
       onClick={onClick}
-      className={`
-        ${active ? colors.activeBg : 'bg-white'} 
-        p-6 rounded-lg shadow-lg border-t-4 ${colors.border}
-        cursor-pointer transform transition-all duration-200 
-        hover:scale-105 hover:shadow-xl
-        ${active ? 'ring-4 ring-opacity-50 ring-' + color + '-300' : ''}
-      `}
+      className={`bg-gradient-to-br ${colors} p-6 rounded-xl border-2 cursor-pointer transition transform hover:scale-105 hover:shadow-lg ${active ? "ring-4 ring-offset-2 ring-blue-300" : ""
+        }`}
     >
-      <div className="flex justify-between items-center">
-        <div>
-          <div className="text-sm text-gray-500 mb-2">{label}</div>
-          <div className={`text-3xl font-bold ${colors.text}`}>
-            {value || 0}
-          </div>
-        </div>
-        <div className={`p-3 rounded-full ${colors.bg}`}>
-          {color === 'blue' && (
-            <svg className={`w-8 h-8 ${colors.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          )}
-          {color === 'green' && (
-            <svg className={`w-8 h-8 ${colors.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-            </svg>
-          )}
-          {color === 'purple' && (
-            <svg className={`w-8 h-8 ${colors.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-          )}
-        </div>
-      </div>
-      {active && (
-        <div className="mt-3 text-xs text-gray-600 flex items-center">
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          Viendo ahora
-        </div>
-      )}
+      <h3 className="text-sm font-bold text-gray-700">{label}</h3>
+      <p className="text-3xl font-bold">{value || 0}</p>
     </div>
   );
 };
 
 const Section = ({ title, children }) => (
-  <div className="mb-8">
+  <section className="mb-8">
     <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
     {children}
-  </div>
+  </section>
 );
 
 const EmptyState = ({ mensaje }) => (
-  <div className="bg-white rounded-lg shadow p-10 text-center text-gray-500">
-    <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+  <div className="bg-white p-10 rounded-xl text-center shadow">
+    <svg
+      className="mx-auto h-12 w-12 text-gray-400 mb-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4"
+      />
     </svg>
-    <p className="text-lg">{mensaje}</p>
+    <p className="text-gray-500 text-lg">{mensaje}</p>
   </div>
 );
-      

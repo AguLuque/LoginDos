@@ -1,9 +1,8 @@
 import { getJugadoresPorNombre, getTodosLosJugadores, testService,   getJugadoresMongo, crearJugadorMongo,} from "../service/jugadoresS.js";
 
-// Controlador para buscar jugadores por nombre
 export const fetchJugadoresPorNombre = async (req, res) => {
     try {
-        const { nombre } = req.params; // Obtener nombre de la URL
+        const { nombre } = req.params; 
         
         if (!nombre || nombre.trim() === '') {
             return res.status(400).json({ 
@@ -61,7 +60,6 @@ export const fetchTodosLosJugadores = async (req, res) => {
     }
 };
 
-// Endpoint Mongo
 export const fetchJugadoresMongo = async (req, res) => {
   try {
     const data = await getJugadoresMongo();
@@ -77,7 +75,6 @@ export const fetchJugadoresMongo = async (req, res) => {
   }
 };
 
-//  POST Mongo (crear jugador)
 export const crearJugadorMongoController = async (req, res) => {
   try {
     const nuevoJugador = await crearJugadorMongo(req.body);
@@ -93,9 +90,7 @@ export const crearJugadorMongoController = async (req, res) => {
 };
 
 
-// Controlador de prueba
 export const testController = async (req, res) => {
-    // Solo disponible en desarrollo
     if (process.env.NODE_ENV === 'production') {
         return res.status(404).json({ 
             success: false,

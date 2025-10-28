@@ -1,8 +1,6 @@
 import pool from "../config/db.js";
 import { JugadorMongo } from "../models/JugadorMongo.js"; 
 
-
-// Servicio para buscar jugadores por nombre
 export const getJugadoresPorNombre = async (nombre) => {
   try {
     const [results] = await pool.execute("CALL JugadorPorNombre(?)", [nombre]);
@@ -13,7 +11,6 @@ export const getJugadoresPorNombre = async (nombre) => {
   }
 };
 
-// Servicio para obtener todos los jugadores
 export const getTodosLosJugadores = async () => {
   try {
     const [results] = await pool.execute("CALL JugadorPorNombre(?)", [""]);
@@ -39,7 +36,6 @@ export const testService = async () => {
 };
 
 
-// Obtener todos los jugadores desde Mongo
 export const getJugadoresMongo = async () => {
   try {
     const jugadores = await JugadorMongo.find();
@@ -50,7 +46,6 @@ export const getJugadoresMongo = async () => {
   }
 };
 
-// Insertar jugador en Mongo
 export const crearJugadorMongo = async (jugadorData) => {
   try {
     const nuevoJugador = new JugadorMongo(jugadorData);
