@@ -5,7 +5,7 @@ import cors from "cors";
 
 // Importar la configuración de la base de datos
 import { connectDB } from "./src/config/db.js"; // conexión MySQL
-import { conectarMongo } from "./src/config/dbMongo.js"; // conexión MongoDB
+// import { conectarMongo } from "./src/config/dbMongo.js"; // ❌ COMENTADO
 
 // Importar rutas
 import jugadoresRoutes from "./src/routes/jugadores.js";
@@ -17,7 +17,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = '0.0.0.0'; // Escuchar en todas las interfaces
+const HOST = '0.0.0.0';
 
 // Middleware para JSON y CORS
 app.use(express.json());
@@ -44,11 +44,11 @@ app.use("/api/dashboard", dashboardRoutes);
 const startServer = async () => {
   try {
     await connectDB(); // MySQL
-    await conectarMongo(); // MongoDB
+    // await conectarMongo(); // ❌ COMENTADO - MongoDB
 
     app.listen(PORT, HOST, () => {
       console.log(`🚀 Servidor escuchando en http://${HOST}:${PORT}`);
-      console.log(`📡 Accesible desde la red en: http://[TU_IP]:${PORT}`);
+      console.log(`📡 Accesible desde la red`);
     });
 
   } catch (error) {

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../context/AuthContext"; // o ../Components/AuthContext si estás fuera
-import { apiurl } from '../config/Const';
+import { useAuth } from "../context/AuthContext";
+import apiurl from '../config/Const';
 
 
-
+ 
 
 const LoginForm = ({ onSwitchToRegister, onLogin }) => {
   const { login } = useAuth();
