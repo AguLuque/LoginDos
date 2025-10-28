@@ -1,3 +1,3 @@
-const apiurl = 'http://localhost:3000';
+const apiurl = 'http://192.168.1.32:3000';
 
 export default apiurl;

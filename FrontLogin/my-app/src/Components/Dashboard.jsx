@@ -30,14 +30,12 @@ const calcularEdad = (fechaNacimiento) => {
   let edad = hoy.getFullYear() - nacimiento.getFullYear();
   const mes = hoy.getMonth() - nacimiento.getMonth();
 
-  // Ajustar si aún no cumplió años este año
   if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
     edad--;
   }
 
   return edad;
 };
-
 
 // ---------------------- COMPONENTES ----------------------
 
@@ -53,6 +51,7 @@ const JugadorCard = ({ jugador }) => {
             src={getJugadorImage(jugador.IdJugador)}
             alt={`${jugador.Nombre} ${jugador.Apellido}`}
             className="h-full w-auto object-contain transition-transform duration-300 hover:scale-105"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="flex items-center justify-center text-gray-400 text-5xl font-bold">
@@ -85,7 +84,6 @@ const JugadorCard = ({ jugador }) => {
         </div>
       </div>
     </div>
-
   );
 };
 
@@ -107,10 +105,10 @@ const PartidoCard = ({ partido }) => (
       {partido.ParejaUno} 🆚 {partido.ParejaDos}
     </div>
     <div className="mt-3 text-sm text-gray-600">
-      <p> {partido.Cancha || 'Por definir'}</p>
-      <p> {partido.Torneo || 'Sin torneo'}</p>
-      <p> {partido.HoraInicio || '--:--'} - {partido.HoraFin || '--:--'}</p>
-      <p> Fase: {partido.Fase || 'N/A'} | Zona {partido.Zona || 'N/A'}</p>
+      <p>📍 {partido.Cancha || 'Por definir'}</p>
+      <p>🏆 {partido.Torneo || 'Sin torneo'}</p>
+      <p>⏰ {partido.HoraInicio || '--:--'} - {partido.HoraFin || '--:--'}</p>
+      <p>🎯 Fase: {partido.Fase || 'N/A'} | Zona {partido.Zona || 'N/A'}</p>
     </div>
   </div>
 );
@@ -119,8 +117,8 @@ const PartidoCard = ({ partido }) => (
 const TorneoCard = ({ torneo }) => (
   <div className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition">
     <h3 className="text-xl font-bold text-purple-700 mb-2">{torneo.Nombre}</h3>
-    <p className="text-gray-600"> Estado: {torneo.Estado}</p>
-    <p className="text-gray-600 mt-2"> Máx Parejas: {torneo.MaxParejas}</p>
+    <p className="text-gray-600">📊 Estado: {torneo.Estado}</p>
+    <p className="text-gray-600 mt-2">👥 Máx Parejas: {torneo.MaxParejas}</p>
     {torneo.Reglamento && (
       <p className="text-xs text-gray-400 mt-2 truncate">📋 {torneo.Reglamento}</p>
     )}
@@ -136,9 +134,11 @@ export default function Dashboard() {
   const [torneos, setTorneos] = useState([]);
   const [activeTab, setActiveTab] = useState("jugadores");
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [jugadoresFiltrados, setJugadoresFiltrados] = useState([]);
   const navigate = useNavigate();
-  const { user, logout } = useAuth(); //
-
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     if (!user) {
@@ -148,6 +148,18 @@ export default function Dashboard() {
     fetchData();
   }, [user, navigate]);
 
+  // Efecto para búsqueda en tiempo real
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchTerm.trim() !== "") {
+        buscarJugadores(searchTerm);
+      } else {
+        setJugadoresFiltrados(jugadores);
+      }
+    }, 500); // Espera 500ms después de que el usuario deje de escribir
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm, jugadores]);
 
   const fetchData = async () => {
     try {
@@ -169,7 +181,10 @@ export default function Dashboard() {
       console.log('Torneos:', torneosData);
 
       if (statsData.success) setStats(statsData.data);
-      if (jugadoresData.success) setJugadores(jugadoresData.data || []);
+      if (jugadoresData.success) {
+        setJugadores(jugadoresData.data || []);
+        setJugadoresFiltrados(jugadoresData.data || []);
+      }
       if (partidosData.success) setPartidos(partidosData.data || []);
       if (torneosData.success) setTorneos(torneosData.data || []);
     } catch (error) {
@@ -177,6 +192,35 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const buscarJugadores = async (nombre) => {
+    if (!nombre.trim()) {
+      setJugadoresFiltrados(jugadores);
+      return;
+    }
+
+    setSearchLoading(true);
+    try {
+      const response = await fetch(`${apiurl}/api/jugadores/buscar/${nombre}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setJugadoresFiltrados(data.data || []);
+      } else {
+        setJugadoresFiltrados([]);
+      }
+    } catch (error) {
+      console.error("Error buscando jugadores:", error);
+      setJugadoresFiltrados([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const limpiarBusqueda = () => {
+    setSearchTerm("");
+    setJugadoresFiltrados(jugadores);
   };
 
   if (loading)
@@ -195,16 +239,15 @@ export default function Dashboard() {
       {/* HEADER */}
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900"> Dashboard Torneos 2025</h1>
+          <h1 className="text-2xl font-bold text-gray-900">🏆 Dashboard Torneos 2025</h1>
           <div className="flex items-center gap-4">
             <span className="text-gray-700">Hola, {user?.nombre || "Invitado"}</span>
             <button
-              onClick={logout} o
+              onClick={logout}
               className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
             >
               Cerrar Sesión
             </button>
-
           </div>
         </div>
       </div>
@@ -239,14 +282,83 @@ export default function Dashboard() {
         {/* Secciones dinámicas */}
         {activeTab === "jugadores" && (
           <Section title="Jugadores Registrados">
-            {jugadores.length > 0 ? (
+            {/* Barra de búsqueda con DaisyUI */}
+            <div className="mb-6">
+              <div className="form-control">
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="Buscar jugador por nombre..."
+                    className="input input-bordered input-primary w-full"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <button
+                      className="btn btn-square btn-outline btn-primary"
+                      onClick={limpiarBusqueda}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                  <button className="btn btn-square btn-primary">
+                    {searchLoading ? (
+                      <span className="loading loading-spinner loading-sm"></span>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+                {searchTerm && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {jugadoresFiltrados.length} resultado(s) encontrado(s)
+                    </span>
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {jugadoresFiltrados.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {jugadores.map((jugador) => (
+                {jugadoresFiltrados.map((jugador) => (
                   <JugadorCard key={jugador.IdJugador} jugador={jugador} />
                 ))}
               </div>
             ) : (
-              <EmptyState mensaje="No hay jugadores registrados." />
+              <EmptyState
+                mensaje={
+                  searchTerm
+                    ? `No se encontraron jugadores con "${searchTerm}"`
+                    : "No hay jugadores registrados."
+                }
+              />
             )}
           </Section>
         )}
@@ -373,3 +485,4 @@ const EmptyState = ({ mensaje }) => (
     <p className="text-lg">{mensaje}</p>
   </div>
 );
+      
