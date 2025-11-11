@@ -12,7 +12,7 @@ services:
       MYSQL_USER: loginuser
       MYSQL_PASSWORD: loginpass
     ports:
-      - "3307:3306"   
+      - "3307:3306"   #  evitamos conflicto con MySQL local
     volumes:
       - ./data/mysql:/var/lib/mysql
     networks:
@@ -35,8 +35,8 @@ services:
     build: ./Back
     container_name: backend
     restart: always
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"      #  solo expone dentro de Docker, no al host
     environment:
       DB_HOST: mysql
       DB_USER: loginuser
