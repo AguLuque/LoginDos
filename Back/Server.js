@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 
 import { connectDB } from "./src/config/db.js"; // conexión MySQL
-import { conectarMongo } from "./src/config/dbMongo.js"; // ❌ COMENTADO
+//import { conectarMongo } from "./src/config/dbMongo.js"; 
 
 import jugadoresRoutes from "./src/routes/jugadores.js";
 import authRoutes from "./src/routes/AuthR.js";
@@ -37,7 +37,7 @@ app.use("/api/dashboard", dashboardRoutes);
 const startServer = async () => {
   try {
     await connectDB(); // MySQL
-    await conectarMongo(); // MongoDB
+    //await conectarMongo(); // MongoDB
 
     app.listen(PORT, HOST, () => {
       console.log(`🚀 Servidor escuchando en http://${HOST}:${PORT}`);
