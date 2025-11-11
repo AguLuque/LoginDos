@@ -12,7 +12,7 @@ services:
       MYSQL_USER: loginuser
       MYSQL_PASSWORD: loginpass
     ports:
-      - "3307:3306"   # 👈 cambiamos puerto para evitar conflictos
+      - "3307:3306"   
     volumes:
       - ./data/mysql:/var/lib/mysql
     networks:
@@ -24,7 +24,7 @@ services:
     container_name: adminer
     restart: always
     ports:
-      - "8080:8080"
+      - "8085:8080"   #  cambiamos para evitar conflicto con Nginx
     depends_on:
       - mysql
     networks:
