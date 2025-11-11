@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  # MySQL
+  # ---------- MySQL ----------
   mysql:
     image: mysql:8
     container_name: mysql
@@ -18,7 +18,7 @@ services:
     networks:
       - app_net
 
-  # Adminer (gestor de MySQL)
+  # ---------- Adminer ----------
   adminer:
     image: adminer
     container_name: adminer
@@ -30,23 +30,22 @@ services:
     networks:
       - app_net
 
-  # MongoDB
+  # ---------- MongoDB ----------
   mongo:
-  image: mongo:6
-  container_name: mongo
-  restart: always
-  environment:
-    MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-    MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-  ports:
-    - "27018:27017"   
-  volumes:
-    - ./data/mongo:/data/db
-  networks:
-    - app_net
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - "27018:27017"   # 👈 puerto cambiado para no chocar con Mongo local
+    volumes:
+      - ./data/mongo:/data/db
+    networks:
+      - app_net
 
-
-  # Mongo Express (interfaz web)
+  # ---------- Mongo Express ----------
   mongo-express:
     image: mongo-express
     container_name: mongo-express
@@ -63,7 +62,7 @@ services:
     networks:
       - app_net
 
-  # Backend (Node.js)
+  # ---------- Backend ----------
   backend:
     build: ./Back
     container_name: backend
@@ -83,7 +82,7 @@ services:
     networks:
       - app_net
 
-  # Frontend (React + Nginx)
+  # ---------- Frontend ----------
   frontend:
     build: ./FrontLogin/my-app
     container_name: frontend
@@ -95,10 +94,7 @@ services:
     networks:
       - app_net
 
+# ---------- Red compartida ----------
 networks:
   app_net:
     driver: bridge
-
-volumes:
-  mysql_data:
-  mongo_data:
