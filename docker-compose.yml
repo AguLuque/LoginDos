@@ -40,12 +40,12 @@ services:
     container_name: backend
     restart: always
     ports:
-      - "3000:3000"     #  <-- AHORA EL BACKEND ES ACCESIBLE DESDE WINDOWS
+      - "3000:3000"     #   <-- AHORA EL BACKEND ES ACCESIBLE DESDE WINDOWS
     environment:
       DB_HOST: mysql
       DB_USER: loginuser
       DB_PASSWORD: loginpass
-      DB_NAME: login_db
+      DB_NAME: torneo
       DB_PORT: 3306
     depends_on:
       mysql:
