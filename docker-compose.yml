@@ -11,7 +11,7 @@ services:
       MYSQL_USER: loginuser
       MYSQL_PASSWORD: loginpass
     ports:
-      - "3307:3306"   #  evitamos conflicto con MySQL local
+      - "3307:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
     healthcheck:
@@ -28,7 +28,7 @@ services:
     container_name: adminer
     restart: always
     ports:
-      - "8085:8080"   #  cambiamos para evitar conflicto con Nginx
+      - "8085:8080"
     depends_on:
       - mysql
     networks:
@@ -39,8 +39,8 @@ services:
     build: ./Back
     container_name: backend
     restart: always
-    expose:
-      - "3000"        #  solo expone dentro de Docker, no al host
+    ports:
+      - "3000:3000"     #  <-- AHORA EL BACKEND ES ACCESIBLE DESDE WINDOWS
     environment:
       DB_HOST: mysql
       DB_USER: loginuser
@@ -49,7 +49,7 @@ services:
       DB_PORT: 3306
     depends_on:
       mysql:
-        condition: service_healthy   #  espera hasta que MySQL esté listo
+        condition: service_healthy
     networks:
       - app_net
 

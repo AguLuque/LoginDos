@@ -1,3 +1,5 @@
-const apiurl = 'http://192.168.56.1:3000';
+const API_HOST = "http://192.168.68.123:3000";  // <-- CAMBIA ESTA IP POR LA TUYA REAL
 
-export default apiurl;
+const API_URL = `${API_HOST}/api`;
+
+export default API_URL;
