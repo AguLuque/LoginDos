@@ -7,7 +7,7 @@ services:
     command: --bind-address=0.0.0.0
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: login_db
+      MYSQL_DATABASE: torneo
       MYSQL_USER: loginuser
       MYSQL_PASSWORD: loginpass
     ports:
